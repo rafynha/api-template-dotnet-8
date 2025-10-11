@@ -1,0 +1,6 @@
+@component.template.api_HostAddress = https://localhost:7253
+
+GET {{@component.template.api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
