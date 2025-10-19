@@ -97,7 +97,7 @@ namespace component.template.api.configuration.General
                services.AddScoped<IUserRepository>(provider =>
                {
                     var context = provider.GetRequiredService<SqlContext>();
-                    var factory = provider.GetRequiredService<IDbContextFactory<DbContext>>();
+                    var factory = provider.GetRequiredService<IDbContextFactory<SqlContext>>();
                     return new UserRepository(context, factory);
                });
                

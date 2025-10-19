@@ -10,6 +10,7 @@ public class UserRepository: BaseRepository<UserDto>, IUserRepository
 {
     public UserRepository(SqlContext context) : base(context) { }
     
-    public UserRepository(SqlContext context, IDbContextFactory<DbContext> contextFactory) 
-        : base(context, contextFactory) { }
+    // Construtor que aceita IDbContextFactory<SqlContext> e converte para DbContext via Adapter
+    public UserRepository(SqlContext context, IDbContextFactory<SqlContext> contextFactory) 
+        : base(context, new SqlContextFactoryAdapter(contextFactory)) { }    
 }
