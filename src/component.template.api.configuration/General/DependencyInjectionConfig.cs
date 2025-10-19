@@ -37,31 +37,35 @@ namespace component.template.api.configuration.General
 
                if (bool.TryParse(_configuration["Database:Cosmos:Active"], out bool cosmosActive))
                {
-                    services.AddDbContext<CosmosContext>(o =>
-                      o.UseCosmos(
-                         _configuration["Database:Cosmos:ConnectionString"] ?? throw new ConfigurationNotFoundExceptionException("Database:Cosmos:ConnectionString"),
-                         _configuration["Database:Cosmos:DatabaseName"] ?? throw new ConfigurationNotFoundExceptionException("Database:Cosmos:DatabaseName")
-                      )
+                    var cosmosConnectionString = _configuration["Database:Cosmos:ConnectionString"] 
+                         ?? throw new ConfigurationNotFoundExceptionException("Database:Cosmos:ConnectionString");
+                    var cosmosDatabaseName = _configuration["Database:Cosmos:DatabaseName"] 
+                         ?? throw new ConfigurationNotFoundExceptionException("Database:Cosmos:DatabaseName");
+                    
+                    // Registrar DbContextFactory PRIMEIRO (como Pooled para evitar conflito com Scoped)
+                    services.AddPooledDbContextFactory<CosmosContext>(o =>
+                      o.UseCosmos(cosmosConnectionString, cosmosDatabaseName)
                     );
                     
-                    // Registrar DbContextFactory para CosmosContext
-                    services.AddDbContextFactory<CosmosContext>(o =>
-                      o.UseCosmos(
-                         _configuration["Database:Cosmos:ConnectionString"] ?? throw new ConfigurationNotFoundExceptionException("Database:Cosmos:ConnectionString"),
-                         _configuration["Database:Cosmos:DatabaseName"] ?? throw new ConfigurationNotFoundExceptionException("Database:Cosmos:DatabaseName")
-                      )
+                    // Depois registrar DbContext (para migrations e uso geral)
+                    services.AddDbContext<CosmosContext>(o =>
+                      o.UseCosmos(cosmosConnectionString, cosmosDatabaseName)
                     );
                }
                if (bool.TryParse(_configuration["Database:Sql:Active"], out bool sqlActive))
                {
-                    services.AddDbContext<SqlContext>(options =>
-                         options.UseSqlServer(_configuration["Database:Sql:ConnectionString"], b => 
+                    var sqlConnectionString = _configuration["Database:Sql:ConnectionString"] 
+                         ?? throw new ConfigurationNotFoundExceptionException("Database:Sql:ConnectionString");
+                    
+                    // Registrar DbContextFactory PRIMEIRO (como Pooled para evitar conflito com Scoped)
+                    services.AddPooledDbContextFactory<SqlContext>(options =>
+                         options.UseSqlServer(sqlConnectionString, b => 
                               b.MigrationsAssembly("component.template.api.infrastructure")
                               .MigrationsHistoryTable("__EFMigrationsHistory", "dbo")));
                     
-                    // Registrar DbContextFactory para SqlContext (para paginação otimizada)
-                    services.AddDbContextFactory<SqlContext>(options =>
-                         options.UseSqlServer(_configuration["Database:Sql:ConnectionString"], b => 
+                    // Depois registrar DbContext (para migrations e uso geral)
+                    services.AddDbContext<SqlContext>(options =>
+                         options.UseSqlServer(sqlConnectionString, b => 
                               b.MigrationsAssembly("component.template.api.infrastructure")
                               .MigrationsHistoryTable("__EFMigrationsHistory", "dbo")));
                }
