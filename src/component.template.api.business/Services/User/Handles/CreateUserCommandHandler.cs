@@ -40,28 +40,40 @@ public class CreateUserCommandHandler : BaseHandler, IRequestHandler<CreateUserC
 
     public async Task<CreateUserResponse> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
-        // Validar se username já existe
-        var existingUsersByUsername = await _unitOfWork.Users.FindAsync(u => u.Username == request.Username);
-        if (existingUsersByUsername.Any())
+        try
         {
-            throw new BusinessRuleException("Username já está em uso.");
-        }
+            await _unitOfWork.BeginTransactionAsync();
 
-        // Validar se email já existe
-        var existingUsersByEmail = await _unitOfWork.Users.FindAsync(u => u.Email == request.Email);
-        if (existingUsersByEmail.Any())
+            // Validar se username já existe
+            var existingUsersByUsername = await _unitOfWork.Users.FindAsync(u => u.Username == request.Username);
+            if (existingUsersByUsername.Any())
+            {
+                throw new BusinessRuleException("Username já está em uso.");
+            }
+
+            // Validar se email já existe
+            var existingUsersByEmail = await _unitOfWork.Users.FindAsync(u => u.Email == request.Email);
+            if (existingUsersByEmail.Any())
+            {
+                throw new BusinessRuleException("Email já está em uso.");
+            }
+
+            // Criar novo usuário
+            var userDto = _mapper.Map<UserDto>(request);
+            
+            // Adicionar ao repositório
+            await _unitOfWork.Users.AddAsync(userDto);
+            await _unitOfWork.CommitAsync();
+
+            await _unitOfWork.CommitTransactionAsync();
+
+            // Retornar resposta
+            return _mapper.Map<CreateUserResponse>(userDto);
+        }
+        catch
         {
-            throw new BusinessRuleException("Email já está em uso.");
+            await _unitOfWork.RollbackAsync();
+            throw;
         }
-
-        // Criar novo usuário
-        var userDto = _mapper.Map<UserDto>(request);
-        
-        // Adicionar ao repositório
-        await _unitOfWork.Users.AddAsync(userDto);
-        await _unitOfWork.CommitAsync();
-
-        // Retornar resposta
-        return _mapper.Map<CreateUserResponse>(userDto);
     }
 }

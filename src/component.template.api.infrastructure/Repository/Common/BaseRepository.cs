@@ -7,9 +7,15 @@ namespace component.template.api.infrastructure.Repository.Common;
 
 public class BaseRepository<T> : IBaseRepository<T> where T : class
 {
+    #region Properties
+
     protected readonly DbContext _context;
     protected readonly DbSet<T> _dbSet;
     protected readonly IDbContextFactory<DbContext>? _contextFactory;
+
+    #endregion
+
+    #region Constructors
 
     public BaseRepository(DbContext context)
     {
@@ -25,6 +31,9 @@ public class BaseRepository<T> : IBaseRepository<T> where T : class
         _contextFactory = contextFactory;
     }
 
+    #endregion
+
+    #region Public Methods
     public async Task<T> GetByIdAsync(int id)
     {
         return await _dbSet.FindAsync(id);
@@ -34,7 +43,6 @@ public class BaseRepository<T> : IBaseRepository<T> where T : class
     {
         return await _dbSet.FindAsync(id);
     }
-
 
     public async Task<IEnumerable<T>> GetAllAsync()
     {
@@ -64,8 +72,8 @@ public class BaseRepository<T> : IBaseRepository<T> where T : class
     }
 
     public async Task<(IEnumerable<T> Data, int TotalCount)> FindPagedAsync(
-        Expression<Func<T, bool>>? predicate, 
-        int pageNumber = 1, 
+        Expression<Func<T, bool>>? predicate,
+        int pageNumber = 1,
         int pageSize = 10,
         Expression<Func<T, object>>? orderBy = null,
         bool orderByDescending = false,
@@ -77,6 +85,29 @@ public class BaseRepository<T> : IBaseRepository<T> where T : class
             ? await FindPagedWithSeparateContextsAsync(predicate, pageNumber, pageSize, orderBy, orderByDescending, includes)
             : await FindPagedWithSharedContextAsync(predicate, pageNumber, pageSize, orderBy, orderByDescending, includes);
     }
+
+    public async Task<int> CountAsync(Expression<Func<T, bool>> predicate)
+    {
+        return await _dbSet.AsNoTracking().Where(predicate).CountAsync();
+    }
+
+    public async Task AddAsync(T entity)
+    {
+        await _dbSet.AddAsync(entity);
+    }
+
+    public async Task<int> UpdateAsync(T entity)
+    {
+        _dbSet.Update(entity);
+        return await _context.SaveChangesAsync();
+    }
+
+    public async Task<int> RemoveAsync(T entity)
+    {
+        _dbSet.Remove(entity);
+        return await _context.SaveChangesAsync();
+    }
+    #endregion
 
     #region Private Helper Methods for FindPagedAsync
 
@@ -196,26 +227,4 @@ public class BaseRepository<T> : IBaseRepository<T> where T : class
     }
 
     #endregion
-
-    public async Task<int> CountAsync(Expression<Func<T, bool>> predicate)
-    {
-        return await _dbSet.AsNoTracking().Where(predicate).CountAsync();
-    }
-
-    public async Task AddAsync(T entity)
-    {
-        await _dbSet.AddAsync(entity);
-    }
-
-    public async Task<int> UpdateAsync(T entity)
-    {
-        _dbSet.Update(entity);
-        return await _context.SaveChangesAsync();
-    }
-
-    public async Task<int> RemoveAsync(T entity)
-    {
-        _dbSet.Remove(entity);
-        return await _context.SaveChangesAsync();
-    }
 }
