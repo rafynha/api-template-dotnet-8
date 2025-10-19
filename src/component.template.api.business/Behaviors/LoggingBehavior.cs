@@ -18,7 +18,7 @@ public class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, 
     {
         try
         {
-            _logger.LogInformation($"➡️ Handling {typeof(TRequest).Name} with data: {@request}");
+            _logger.LogInformation($"➡️ Handling {typeof(TRequest).Name} with data: {(request != null ? System.Text.Json.JsonSerializer.Serialize(request) : "null")}");
 
             var response = await next();
 

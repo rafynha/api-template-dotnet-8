@@ -74,13 +74,15 @@ public class UpdateUserCommandHandler : BaseHandler, IRequestHandler<UpdateUserC
             existingUser.UpdatedAt = DateTime.UtcNow;
             ValidateAndUpdatePassword(request, existingUser);
 
+            var user = _mapper.Map<UserDto>(existingUser);
+
             // Atualizar no repositório
-            if (await _unitOfWork.Users.UpdateAsync(_mapper.Map<UserDto>(existingUser)) <= 0)
+            if (await _unitOfWork.Users.UpdateAsync(user) <= 0)
                 throw new DatabaseErrorException("Erro ao atualizar credenciais do usuário.");
 
             await _unitOfWork.CommitTransactionAsync();
 
-            return _mapper.Map<UpdateUserResponse>(existingUser);
+            return _mapper.Map<UpdateUserResponse>(user);
         }
         catch
         {
