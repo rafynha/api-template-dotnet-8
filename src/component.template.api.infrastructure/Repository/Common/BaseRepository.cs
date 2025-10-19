@@ -34,24 +34,44 @@ public class BaseRepository<T> : IBaseRepository<T> where T : class
     #endregion
 
     #region Public Methods
-    public async Task<T> GetByIdAsync(int id)
+    public async Task<T?> GetByIdAsync(int id)
     {
+        // Tenta obter o nome da chave primária dos metadados do EF
+        var primaryKeyName = GetPrimaryKeyName();
+        if (primaryKeyName != null)
+        {
+            // Usa a chave primária descoberta dinamicamente com AsNoTracking
+            return await _dbSet.AsNoTracking()
+                .FirstOrDefaultAsync(e => EF.Property<int>(e, primaryKeyName) == id);
+        }
+
+        // Fallback: usa FindAsync (com tracking) se não conseguir descobrir a chave
         return await _dbSet.FindAsync(id);
     }
 
-    public async Task<T> GetByIdAsync(long id)
+    public async Task<T?> GetByIdAsync(long id)
     {
+        // Tenta obter o nome da chave primária dos metadados do EF
+        var primaryKeyName = GetPrimaryKeyName();
+        if (primaryKeyName != null)
+        {
+            // Usa a chave primária descoberta dinamicamente com AsNoTracking
+            return await _dbSet.AsNoTracking()
+                .FirstOrDefaultAsync(e => EF.Property<long>(e, primaryKeyName) == id);
+        }
+
+        // Fallback: usa FindAsync (com tracking) se não conseguir descobrir a chave
         return await _dbSet.FindAsync(id);
     }
 
     public async Task<IEnumerable<T>> GetAllAsync()
     {
-        return await _dbSet.ToListAsync();
+        return await _dbSet.AsNoTracking().ToListAsync();
     }
 
     public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate)
     {
-        return await _dbSet.Where(predicate).ToListAsync();
+        return await _dbSet.AsNoTracking().Where(predicate).ToListAsync();
     }
 
     public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes)
@@ -226,5 +246,32 @@ public class BaseRepository<T> : IBaseRepository<T> where T : class
         return (dataTask.Result, countTask.Result);
     }
 
+    #endregion
+
+    #region Private Helper Method for GetByIdAsync
+    /// <summary>
+    /// Obtém o nome da propriedade da chave primária através dos metadados do Entity Framework.
+    /// Retorna null se não conseguir descobrir a chave primária.
+    /// </summary>
+    private string? GetPrimaryKeyName()
+    {
+        try
+        {
+            var entityType = _context.Model.FindEntityType(typeof(T));
+            var primaryKey = entityType?.FindPrimaryKey();
+
+            // Verifica se existe chave primária e se é simples (não composta)
+            if (primaryKey?.Properties.Count == 1)
+            {
+                return primaryKey.Properties[0].Name;
+            }
+
+            return null; // Chave composta ou não encontrada
+        }
+        catch
+        {
+            return null; // Qualquer erro retorna null para usar fallback
+        }
+    }
     #endregion
 }

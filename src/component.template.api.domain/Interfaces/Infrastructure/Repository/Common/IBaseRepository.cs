@@ -5,8 +5,8 @@ namespace component.template.api.domain.Interfaces.Infrastructure.Repository.Com
 
 public interface IBaseRepository<T> where T : class
 {
-    Task<T> GetByIdAsync(int id);
-    Task<T> GetByIdAsync(long id);
+    Task<T?> GetByIdAsync(int id);
+    Task<T?> GetByIdAsync(long id);
     Task<IEnumerable<T>> GetAllAsync();
     Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate);
     Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate, params Expression<Func<T, object>>[] includes);

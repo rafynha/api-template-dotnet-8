@@ -91,7 +91,7 @@ public class UpdateUserCommandHandler : BaseHandler, IRequestHandler<UpdateUserC
 
     private static void ValidateAndUpdatePassword(UpdateUserCommand request, GetUserByIdInternalResponse existingUser)
     {
-        if(!string.IsNullOrEmpty(request.Password) || existingUser.PasswordHash == PasswordHelper.HashPassword(request.Password))
+        if(string.IsNullOrEmpty(request.Password) || existingUser.PasswordHash == PasswordHelper.HashPassword(request.Password))
             return;
 
         if (PasswordHelper.CompareWithLastPassword(existingUser.PasswordHash, request.Password))

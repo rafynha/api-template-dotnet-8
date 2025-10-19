@@ -33,8 +33,14 @@ public class GetAllUsersQueryHandlerTests
         query.PageNumber = 1;
         query.PageSize = 10;
 
-        _unitOfWork.Users.FindAsync(Arg.Any<Expression<Func<UserDto, bool>>>())
-            .Returns(userList);
+        _unitOfWork.Users.FindPagedAsync(
+            Arg.Any<Expression<Func<UserDto, bool>>>(),
+            Arg.Any<int>(),
+            Arg.Any<int>(),
+            Arg.Any<Expression<Func<UserDto, object>>>(),
+            Arg.Any<bool>(),
+            Arg.Any<Expression<Func<UserDto, object>>[]>())
+            .Returns((userList.AsEnumerable(), userList.Count));
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -45,7 +51,6 @@ public class GetAllUsersQueryHandlerTests
         Assert.Equal(userList.Count, result.TotalCount);
         Assert.Equal(1, result.PageNumber);
         Assert.Equal(10, result.PageSize);
-        await _unitOfWork.Users.Received(1).FindAsync(Arg.Any<Expression<Func<UserDto, bool>>>());
     }
 
     [Fact]
@@ -68,8 +73,17 @@ public class GetAllUsersQueryHandlerTests
             CreatedAt = DateTime.Now
         }).ToList();
 
-        _unitOfWork.Users.FindAsync(Arg.Any<Expression<Func<UserDto, bool>>>())
-            .Returns(fullUserList);
+        // Simular paginação: página 2, 5 itens (índices 5-9)
+        var pagedUsers = fullUserList.Skip(5).Take(5).ToList();
+
+        _unitOfWork.Users.FindPagedAsync(
+            Arg.Any<Expression<Func<UserDto, bool>>>(),
+            Arg.Any<int>(),
+            Arg.Any<int>(),
+            Arg.Any<Expression<Func<UserDto, object>>>(),
+            Arg.Any<bool>(),
+            Arg.Any<Expression<Func<UserDto, object>>[]>())
+            .Returns((pagedUsers.AsEnumerable(), 15));
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -103,8 +117,14 @@ public class GetAllUsersQueryHandlerTests
 
         var userList = new List<UserDto> { user1 };
 
-        _unitOfWork.Users.FindAsync(Arg.Any<Expression<Func<UserDto, bool>>>())
-            .Returns(userList);
+        _unitOfWork.Users.FindPagedAsync(
+            Arg.Any<Expression<Func<UserDto, bool>>>(),
+            Arg.Any<int>(),
+            Arg.Any<int>(),
+            Arg.Any<Expression<Func<UserDto, object>>>(),
+            Arg.Any<bool>(),
+            Arg.Any<Expression<Func<UserDto, object>>[]>())
+            .Returns((userList.AsEnumerable(), userList.Count));
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -133,8 +153,14 @@ public class GetAllUsersQueryHandlerTests
 
         var userList = new List<UserDto> { user1 };
 
-        _unitOfWork.Users.FindAsync(Arg.Any<Expression<Func<UserDto, bool>>>())
-            .Returns(userList);
+        _unitOfWork.Users.FindPagedAsync(
+            Arg.Any<Expression<Func<UserDto, bool>>>(),
+            Arg.Any<int>(),
+            Arg.Any<int>(),
+            Arg.Any<Expression<Func<UserDto, object>>>(),
+            Arg.Any<bool>(),
+            Arg.Any<Expression<Func<UserDto, object>>[]>())
+            .Returns((userList.AsEnumerable(), userList.Count));
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -163,8 +189,14 @@ public class GetAllUsersQueryHandlerTests
 
         var userList = new List<UserDto> { user1 };
 
-        _unitOfWork.Users.FindAsync(Arg.Any<Expression<Func<UserDto, bool>>>())
-            .Returns(userList);
+        _unitOfWork.Users.FindPagedAsync(
+            Arg.Any<Expression<Func<UserDto, bool>>>(),
+            Arg.Any<int>(),
+            Arg.Any<int>(),
+            Arg.Any<Expression<Func<UserDto, object>>>(),
+            Arg.Any<bool>(),
+            Arg.Any<Expression<Func<UserDto, object>>[]>())
+            .Returns((userList.AsEnumerable(), userList.Count));
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -194,8 +226,14 @@ public class GetAllUsersQueryHandlerTests
 
         var userList = new List<UserDto> { user1 };
 
-        _unitOfWork.Users.FindAsync(Arg.Any<Expression<Func<UserDto, bool>>>())
-            .Returns(userList);
+        _unitOfWork.Users.FindPagedAsync(
+            Arg.Any<Expression<Func<UserDto, bool>>>(),
+            Arg.Any<int>(),
+            Arg.Any<int>(),
+            Arg.Any<Expression<Func<UserDto, object>>>(),
+            Arg.Any<bool>(),
+            Arg.Any<Expression<Func<UserDto, object>>[]>())
+            .Returns((userList.AsEnumerable(), userList.Count));
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);
@@ -218,8 +256,14 @@ public class GetAllUsersQueryHandlerTests
         query.PageSize = 10;
         var emptyUserList = new List<UserDto>();
 
-        _unitOfWork.Users.FindAsync(Arg.Any<Expression<Func<UserDto, bool>>>())
-            .Returns(emptyUserList);
+        _unitOfWork.Users.FindPagedAsync(
+            Arg.Any<Expression<Func<UserDto, bool>>>(),
+            Arg.Any<int>(),
+            Arg.Any<int>(),
+            Arg.Any<Expression<Func<UserDto, object>>>(),
+            Arg.Any<bool>(),
+            Arg.Any<Expression<Func<UserDto, object>>[]>())
+            .Returns((emptyUserList.AsEnumerable(), 0));
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);

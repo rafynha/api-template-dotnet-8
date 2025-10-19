@@ -50,7 +50,7 @@ public class GetUserByIdQueryHandlerTests
         // Assert
         Assert.NotNull(result);
         Assert.Equal(userDto.UserId, result.Id);
-        Assert.Equal(userDto.Username, result.Name);
+        Assert.Equal(userDto.Username, result.Username);
         
         await _mediator.Received(1).Send(
             Arg.Is<GetProfileByIdQuery>(x => x.Id == query.Id), 
@@ -122,6 +122,6 @@ public class GetUserByIdQueryHandlerTests
         // Assert
         Assert.NotNull(result);
         Assert.Equal(firstUser.UserId, result.Id);
-        Assert.Equal(firstUser.Username, result.Name);
+        Assert.Equal(firstUser.Username, result.Username);
     }
 }
