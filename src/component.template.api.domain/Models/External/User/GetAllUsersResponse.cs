@@ -1,8 +1,6 @@
-using System;
-
 namespace component.template.api.domain.Models.External.User;
 
-public class GetUserByIdResponse
+public class GetAllUsersResponse
 {
     public long Id { get; set; }
     public string Username { get; set; } = string.Empty;

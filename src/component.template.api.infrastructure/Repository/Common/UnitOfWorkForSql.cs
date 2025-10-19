@@ -11,6 +11,11 @@ public class UnitOfWorkForSql : IUnitOfWork
 
     public IUserRepository Users { get; }
 
+    // NOTA IMPORTANTE: 
+    // O repositório injetado aqui tem acesso ao DbContextFactory, mas dentro de transações
+    // ele NÃO deve usar o factory (pois criaria novos contextos fora da transação).
+    // O BaseRepository detecta automaticamente: se tiver factory disponível, usa para FindPagedAsync.
+    // Para operações CRUD normais (Add, Update, Remove), sempre usa o _context compartilhado.
     public UnitOfWorkForSql(SqlContext context,
                       IUserRepository users)
     {

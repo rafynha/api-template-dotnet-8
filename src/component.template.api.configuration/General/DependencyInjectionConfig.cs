@@ -43,10 +43,24 @@ namespace component.template.api.configuration.General
                          _configuration["Database:Cosmos:DatabaseName"] ?? throw new ConfigurationNotFoundExceptionException("Database:Cosmos:DatabaseName")
                       )
                     );
+                    
+                    // Registrar DbContextFactory para CosmosContext
+                    services.AddDbContextFactory<CosmosContext>(o =>
+                      o.UseCosmos(
+                         _configuration["Database:Cosmos:ConnectionString"] ?? throw new ConfigurationNotFoundExceptionException("Database:Cosmos:ConnectionString"),
+                         _configuration["Database:Cosmos:DatabaseName"] ?? throw new ConfigurationNotFoundExceptionException("Database:Cosmos:DatabaseName")
+                      )
+                    );
                }
                if (bool.TryParse(_configuration["Database:Sql:Active"], out bool sqlActive))
                {
                     services.AddDbContext<SqlContext>(options =>
+                         options.UseSqlServer(_configuration["Database:Sql:ConnectionString"], b => 
+                              b.MigrationsAssembly("component.template.api.infrastructure")
+                              .MigrationsHistoryTable("__EFMigrationsHistory", "dbo")));
+                    
+                    // Registrar DbContextFactory para SqlContext (para paginação otimizada)
+                    services.AddDbContextFactory<SqlContext>(options =>
                          options.UseSqlServer(_configuration["Database:Sql:ConnectionString"], b => 
                               b.MigrationsAssembly("component.template.api.infrastructure")
                               .MigrationsHistoryTable("__EFMigrationsHistory", "dbo")));
@@ -75,7 +89,14 @@ namespace component.template.api.configuration.General
 
           private void DataBuilder(IServiceCollection services)
           {
-               services.AddScoped<IUserRepository, UserRepository>();
+               // Registrar UserRepository com DbContextFactory para paginação otimizada
+               services.AddScoped<IUserRepository>(provider =>
+               {
+                    var context = provider.GetRequiredService<SqlContext>();
+                    var factory = provider.GetRequiredService<IDbContextFactory<DbContext>>();
+                    return new UserRepository(context, factory);
+               });
+               
                services.AddScoped<IUnitOfWork, UnitOfWorkForSql>();
           }
 
