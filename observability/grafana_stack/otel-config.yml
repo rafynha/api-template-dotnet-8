@@ -1,0 +1,39 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+exporters:
+  debug:
+    verbosity: detailed
+  otlp:
+    endpoint: jaeger:4317  # Jaeger aceita OTLP
+    tls:
+      insecure: true
+  loki:
+    endpoint: http://loki:3100/loki/api/v1/push  # Loki via HTTP
+    tls:
+      insecure: true
+    headers:
+      Content-Type: "application/x-protobuf"
+
+processors:
+  batch:
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlp, debug]  # Traces para Jaeger
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [debug]  # Apenas debug para métricas
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [loki, debug]  # Logs para Loki

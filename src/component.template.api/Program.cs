@@ -26,6 +26,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddConfiguration(new SwaggerConfiguration(builder.Configuration));
 builder.Services.AddConfiguration(new DependencyInjectionConfig(builder.Configuration));
+builder.Services.AddConfiguration(new OpenTelemetryConfig(builder.Configuration));
 //builder.Services.AddConfiguration(new AuthenticationConfiguration(builder.Configuration));    
 builder.Services.AddAuroraMediator(assemblies)
     .AddPipelineBehavior(typeof(LoggingBehavior<,>))
