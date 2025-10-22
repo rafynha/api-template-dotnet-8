@@ -25,17 +25,32 @@ services:
     - ./grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
     restart: unless-stopped
 
-  jaeger:
-    image: docker.io/jaegertracing/all-in-one:1.56  # Versão específica
-    container_name: jaeger_server
+  # jaeger:
+  #   image: docker.io/jaegertracing/all-in-one:1.56  # Versão específica
+  #   container_name: jaeger_server
+  #   ports:
+  #     - "16686:16686"
+  #     - "14268:14268"
+  #     - "14250:14250"
+  #   networks:
+  #     - monitoring
+  #   environment:
+  #     - COLLECTOR_OTLP_ENABLED=true
+  #   restart: unless-stopped
+  
+  tempo:
+    image: grafana/tempo:2.5.0
+    container_name: tempo_server
     ports:
-      - "16686:16686"
-      - "14268:14268"
-      - "14250:14250"
+      - "3200:3200"
+      - "9095:9095"
     networks:
       - monitoring
-    environment:
-      - COLLECTOR_OTLP_ENABLED=true
+    command: 
+      - "-config.file=/etc/tempo.yaml"
+    volumes:
+      - ./tempo-config.yml:/etc/tempo.yaml:ro
+      - tempo_data:/tmp/tempo
     restart: unless-stopped
 
   loki:
@@ -66,3 +81,6 @@ services:
 networks:
   monitoring:
     driver: bridge
+
+volumes:
+  tempo_data:

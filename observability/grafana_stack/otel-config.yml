@@ -10,7 +10,8 @@ exporters:
   debug:
     verbosity: detailed
   otlp:
-    endpoint: jaeger:4317  # Jaeger aceita OTLP
+    # endpoint: jaeger:4317  # Jaeger aceita OTLP
+    endpoint: tempo_server:4317  # Tempo aceita OTLP
     tls:
       insecure: true
   loki:
@@ -28,7 +29,7 @@ service:
     traces:
       receivers: [otlp]
       processors: [batch]
-      exporters: [otlp, debug]  # Traces para Jaeger
+      exporters: [otlp, debug]  # Traces para Tempo
     metrics:
       receivers: [otlp]
       processors: [batch]

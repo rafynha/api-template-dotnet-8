@@ -16,7 +16,12 @@ datasources:
     secureJsonData:
       httpHeaderValue1: "fake"  # Loki sem auth requer este header
 
-  - name: Jaeger
-    type: jaeger
+  - name: Tempo
+    type: tempo
     access: proxy
-    url: http://jaeger_server:16686
+    url: http://tempo_server:3200
+
+  # - name: Jaeger
+  #   type: jaeger
+  #   access: proxy
+  #   url: http://jaeger_server:16686
