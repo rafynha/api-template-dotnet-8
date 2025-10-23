@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using component.template.api.domain.Models.Common;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
@@ -8,11 +9,16 @@ public class ServiceResultFilter : IResultFilter
 {
     public void OnResultExecuting(ResultExecutingContext context)
     {
+        var traceId = Activity.Current?.TraceId.ToString() ??
+                     context.HttpContext.TraceIdentifier;
+
         if (context.Result is ObjectResult objectResult)
         {
-            if(objectResult.StatusCode == 200 || objectResult.StatusCode == 201)
-                objectResult.Value = new DefaultApiResponse<object>{ Data = objectResult.Value };
+            if (objectResult.StatusCode == 200 || objectResult.StatusCode == 201)
+                objectResult.Value = new DefaultApiResponse<object> { Data = objectResult.Value };
         }
+        
+        context.HttpContext.Response.Headers.TryAdd("X-Trace-Id", traceId);
     }
 
     public void OnResultExecuted(ResultExecutedContext context)

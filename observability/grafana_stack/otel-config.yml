@@ -20,6 +20,11 @@ exporters:
       insecure: true
     headers:
       Content-Type: "application/x-protobuf"
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+    namespace: otel
+    const_labels:
+      collector: "otel-collector"
 
 processors:
   batch:
@@ -33,7 +38,7 @@ service:
     metrics:
       receivers: [otlp]
       processors: [batch]
-      exporters: [debug]  # Apenas debug para métricas
+      exporters: [prometheus, debug]  # Apenas debug para métricas
     logs:
       receivers: [otlp]
       processors: [batch]

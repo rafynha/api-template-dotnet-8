@@ -3,23 +3,40 @@ apiVersion: 1
 datasources:
   - name: Prometheus
     type: prometheus
+    uid: prometheus-uid
     access: proxy
     url: http://prometheus_server:9090
-    isDefault: true
+    isDefault: false
 
   - name: Loki
     type: loki
+    uid: loki-uid
     access: proxy
     url: http://loki_server:3100
+    isDefault: true
+    # ✅ CONFIGURAÇÃO MINIMALISTA (sem recursos avançados)
     jsonData:
-      httpHeaderName1: "X-Scope-OrgID"
-    secureJsonData:
-      httpHeaderValue1: "fake"  # Loki sem auth requer este header
+      maxLines: 1000
+      # ✅ APENAS o essencial - remove todos os recursos opcionais
+      derivedFields:
+        - datasourceUid: tempo-uid
+          matcherRegex: "trace_id=(\\w+)"
+          name: TraceID
+          url: "$${__value.raw}"
 
   - name: Tempo
     type: tempo
+    uid: tempo-uid
     access: proxy
     url: http://tempo_server:3200
+    isDefault: false
+    jsonData:
+      tracesToLogs:
+        datasourceUid: loki-uid
+        filterByTraceID: true
+        tags: ['service_name']
+        spanStartTimeShift: '-1h'
+        spanEndTimeShift: '1h'
 
   # - name: Jaeger
   #   type: jaeger

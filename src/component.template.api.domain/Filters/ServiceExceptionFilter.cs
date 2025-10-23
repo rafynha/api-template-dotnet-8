@@ -25,6 +25,10 @@ public class ServiceExceptionFilter : ExceptionFilterAttribute
 
     public override void OnException(ExceptionContext context)
     {
+        // CAPTURA o TraceId da requisição atual
+        var traceId = Activity.Current?.TraceId.ToString() ??
+                     context.HttpContext.TraceIdentifier;
+                     
         var customException = ConvertException(context.Exception);
         AddErrorToResult(context, customException);
         
@@ -33,23 +37,26 @@ public class ServiceExceptionFilter : ExceptionFilterAttribute
             StatusCode = (int)customException.StatusCode
         };
 
+        // ADICIONA TraceId no header HTTP
+        context.HttpContext.Response.Headers.TryAdd("X-Trace-Id", traceId);
+
         // Log the exception
-        LogExceptionByLevel(context.Exception, customException.Level);
+        LogExceptionByLevel(context.Exception, customException.Level, traceId);
 
         // Set the result
         context.Result = result;
     }
 
-    private void LogExceptionByLevel(Exception exception, TraceLevel level)
+    private void LogExceptionByLevel(Exception exception, TraceLevel level, string traceId)
     {
         switch (level)
         {
             case TraceLevel.Warning:
-                _logger.LogWarning("Exception occurred while executing request: {ex}", exception);
+                _logger.LogWarning("Exception occurred while executing request: {ex}, TraceId: {traceId}", exception, traceId);
                 break;
             case TraceLevel.Error:
             default:
-                _logger.LogError("Exception occurred while executing request: {ex}", exception);
+                _logger.LogError("Exception occurred while executing request: {ex}, TraceId: {traceId}", exception, traceId);
                 break;
         }
     }

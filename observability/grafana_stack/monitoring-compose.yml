@@ -54,16 +54,17 @@ services:
     restart: unless-stopped
 
   loki:
-    image:  docker.io/grafana/loki:2.9.4  # Versão que suporta volume_enabled #docker.io/grafana/loki:2.8.4  # Versão estável
+    image: grafana/loki:3.1.0                      # ✅ NOVA linha - adicionar serviço Loki
     container_name: loki_server
     ports:
       - "3100:3100"
     networks:
       - monitoring
     volumes:
-      - ./loki-config.yml:/etc/loki/local-config.yml
+      - ./loki-config-v3.yml:/etc/loki/local-config.yml
+      - loki_data:/loki
     command: -config.file=/etc/loki/local-config.yml
-    restart: unless-stopped
+    restart: unless-stopped             # ✅ MUDA para latest
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.102.0 #docker.io/otel/opentelemetry-collector:0.96.0  # Versão compatível
@@ -84,3 +85,4 @@ networks:
 
 volumes:
   tempo_data:
+  loki_data:     

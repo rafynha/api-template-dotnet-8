@@ -1,0 +1,66 @@
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+
+common:
+  instance_addr: 127.0.0.1
+  path_prefix: /loki
+  storage:
+    filesystem:
+      chunks_directory: /loki/chunks
+      rules_directory: /loki/rules
+  replication_factor: 1
+  ring:
+    kvstore:
+      store: inmemory
+
+# ✅ LIMITAÇÃO DE ESPAÇO
+limits_config:
+  retention_period: 168h                         # 7 dias de retenção
+  max_global_streams_per_user: 5000
+  max_query_length: 721h                         # 30 dias max query
+  max_query_parallelism: 32
+  max_streams_per_user: 0
+  max_line_size: 256000                          # 256KB por linha de log
+  ingestion_rate_mb: 4                           # 4MB/s max ingestão
+  ingestion_burst_size_mb: 6                     # 6MB burst
+  per_stream_rate_limit: 3MB                     # 3MB por stream
+  per_stream_rate_limit_burst: 15MB              # 15MB burst por stream
+
+# ✅ COMPACTAÇÃO CORRIGIDA com delete-request-store
+compactor:
+  working_directory: /loki/compactor
+  compaction_interval: 10m
+  retention_enabled: true                        # ✅ ATIVA limpeza automática
+  retention_delete_delay: 2h
+  retention_delete_worker_count: 150
+  delete_request_store: filesystem               # ✅ ADICIONADO - obrigatório para retention
+
+query_range:
+  results_cache:
+    cache:
+      embedded_cache:
+        enabled: true
+        max_size_mb: 100
+
+schema_config:
+  configs:
+    - from: 2020-10-24
+      store: tsdb
+      object_store: filesystem
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h
+
+# ✅ STORAGE SIMPLIFICADO
+storage_config:
+  filesystem:
+    directory: /loki/chunks
+  tsdb_shipper:
+    active_index_directory: /loki/index
+    cache_location: /loki/index_cache
+    
+analytics:
+  reporting_enabled: false
