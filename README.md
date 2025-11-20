@@ -7,11 +7,11 @@ Template de API REST usando .NET 8 com Entity Framework Core e arquitetura em ca
 ```
 src/
 ├── component.template.api/                 # API principal
-├── component.template.api.business/        # Regras de negócio
-├── component.template.api.configuration/   # Configurações
-├── component.template.api.domain/          # Entidades e DTOs
-├── component.template.api.infrastructure/  # Acesso a dados
-└── component.template.api.test/            # Testes
+├── component.template.business/            # Regras de negócio
+├── component.template.configuration/       # Configurações
+├── component.template.domain/              # Entidades e DTOs
+├── component.template.infrastructure/      # Acesso a dados
+└── component.template.business.test/       # Testes
 ```
 
 ## Configuração do Banco de Dados
@@ -39,7 +39,7 @@ O projeto suporta múltiplos bancos de dados configurados no `appsettings.json`:
 
 1. **Navegar para o projeto Infrastructure:**
    ```bash
-   cd src/component.template.api.infrastructure
+   cd src/component.template.infrastructure
    ```
 
 2. **Criar migration inicial:**
@@ -85,7 +85,7 @@ dotnet ef migrations script --context SqlContext --startup-project ../component.
 As migrations ficam organizadas na seguinte estrutura:
 
 ```
-component.template.api.infrastructure/
+component.template.infrastructure/
 ├── ExternalServices/
 └── Repository/
     ├── Common/

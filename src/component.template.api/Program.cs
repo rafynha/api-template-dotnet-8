@@ -1,10 +1,10 @@
 using System.Text.Json.Serialization;
 using Aurora.Mediator.Extensions;
-using component.template.api.business.Behaviors;
-using component.template.api.configuration;
-using component.template.api.configuration.General;
-using component.template.api.domain.Filters;
-using component.template.api.domain.Helpers;
+using component.template.business.Behaviors;
+using component.template.configuration;
+using component.template.configuration.General;
+using component.template.domain.Filters;
+using component.template.domain.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 var assemblies = AppDomain.CurrentDomain.GetAssemblies()
@@ -44,7 +44,7 @@ builder.Services.AddAuroraMediator(assemblies)
 var app = builder.Build();
 
 HttpHelper.Configure(app.Services.GetRequiredService<IHttpContextAccessor>());
-app.UseMiddleware<component.template.api.domain.Middleware.ServiceHttpContextMiddleware>();
+app.UseMiddleware<component.template.domain.Middleware.ServiceHttpContextMiddleware>();
 
 app.UseSwagger();
 app.UseSwaggerUI();

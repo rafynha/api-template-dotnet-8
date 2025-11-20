@@ -1,0 +1,29 @@
+using System.Diagnostics;
+using component.template.domain.Models.Common;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Filters;
+
+namespace component.template.domain.Filters;
+
+public class ServiceResultFilter : IResultFilter
+{
+    public void OnResultExecuting(ResultExecutingContext context)
+    {
+        var traceId = Activity.Current?.TraceId.ToString() ??
+                     context.HttpContext.TraceIdentifier;
+
+        if (context.Result is ObjectResult objectResult)
+        {
+            if (objectResult.StatusCode == 200 || objectResult.StatusCode == 201)
+                objectResult.Value = new DefaultApiResponse<object> { Data = objectResult.Value };
+        }
+        
+        context.HttpContext.Response.Headers.TryAdd("X-Trace-Id", traceId);
+    }
+
+    public void OnResultExecuted(ResultExecutedContext context)
+    {
+    }
+}
+
+//https://learn.microsoft.com/en-us/aspnet/core/mvc/controllers/filters?view=aspnetcore-9.0&viewFallbackFrom=aspnetcore-2.0#result-filters

@@ -1,13 +1,13 @@
 using Aurora.Mediator;
-using component.template.api.domain.Exceptions;
-using component.template.api.domain.Filters;
-using component.template.api.domain.Helpers;
-using component.template.api.domain.Interfaces.Common;
-using component.template.api.domain.Models.Common;
-using component.template.api.domain.Models.External;
-using component.template.api.domain.Models.External.User;
-using component.template.api.domain.Models.External.User.Commands;
-using component.template.api.domain.Models.External.User.Queries;
+using component.template.domain.Exceptions;
+using component.template.domain.Filters;
+using component.template.domain.Helpers;
+using component.template.domain.Interfaces.Common;
+using component.template.domain.Models.Common;
+using component.template.domain.Models.External;
+using component.template.domain.Models.External.User;
+using component.template.domain.Models.External.User.Commands;
+using component.template.domain.Models.External.User.Queries;
 using Microsoft.AspNetCore.Mvc;
 
 namespace component.template.api.Controllers
